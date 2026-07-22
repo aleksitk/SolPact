@@ -1,7 +1,6 @@
-import { clusterApiUrl } from '@solana/web3.js'
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
+import { clusterApiUrl, type Cluster } from '@solana/web3.js'
 
-export const SOLANA_NETWORK = WalletAdapterNetwork.Devnet
+export const SOLANA_NETWORK: Cluster = 'devnet'
 
 export const SOLANA_CLUSTER = 'devnet' as const
 
