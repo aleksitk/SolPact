@@ -18,3 +18,8 @@ export const RPC_ENDPOINT =
 // Overridable via VITE_VAULT_ADDRESS.
 export const VAULT_ADDRESS =
   ENV.VITE_VAULT_ADDRESS ?? 'FPPxf4dtUhPdrAkZHBTDvppkMREFVJ8FFtBDoc7moPEq'
+
+// DEMO ONLY (Devnet): the vault keypair secret, as a JSON array of bytes, so
+// the client can sign the claim (vault -> user) transfer. Never use a real
+// wallet or mainnet funds here. Unset in most environments -> claim disabled.
+export const VAULT_SECRET_KEY = ENV.VITE_VAULT_SECRET_KEY
