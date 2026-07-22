@@ -5,17 +5,20 @@ import { WalletPanel } from './components/WalletPanel'
 import { CreateCommitmentForm } from './components/CreateCommitmentForm'
 import { Dashboard } from './components/Dashboard'
 import {
-  loadCommitments,
   recordCheckIn,
+  recordClaim,
+  refreshStatuses,
   type Commitment,
 } from './lib/commitments'
 import { buildCheckInTransaction, checkInMemo } from './solana/stake'
+import { claimStake, isVaultConfigured } from './solana/vault'
 import { SOLANA_NETWORK } from './config'
 
 function Home() {
   const { connected, publicKey, sendTransaction } = useWallet()
   const { connection } = useConnection()
-  const [commitments, setCommitments] = useState(() => loadCommitments())
+  // Recompute forfeited statuses for any broken streaks on load.
+  const [commitments, setCommitments] = useState(() => refreshStatuses())
 
   async function handleCheckIn(commitment: Commitment) {
     if (!publicKey) throw new Error('Connect your wallet first.')
@@ -29,6 +32,12 @@ function Home() {
     await connection.confirmTransaction({ signature, ...latest }, 'confirmed')
 
     setCommitments(recordCheckIn(commitment.id, signature))
+  }
+
+  async function handleClaim(commitment: Commitment) {
+    if (!publicKey) throw new Error('Connect your wallet first.')
+    const signature = await claimStake(connection, publicKey, commitment.stakeSol)
+    setCommitments(recordClaim(commitment.id, signature))
   }
 
   return (
@@ -51,9 +60,14 @@ function Home() {
         {connected && (
           <>
             <CreateCommitmentForm
-              onCreated={() => setCommitments(loadCommitments())}
+              onCreated={() => setCommitments(refreshStatuses())}
             />
-            <Dashboard commitments={commitments} onCheckIn={handleCheckIn} />
+            <Dashboard
+              commitments={commitments}
+              onCheckIn={handleCheckIn}
+              onClaim={handleClaim}
+              vaultConfigured={isVaultConfigured()}
+            />
           </>
         )}
       </div>

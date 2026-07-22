@@ -16,6 +16,7 @@ export type Commitment = {
   stakeSignature: string
   status: CommitmentStatus
   checkIns: CheckIn[]
+  claimSignature?: string
 }
 
 const STORAGE_KEY = 'solpact.commitments.v1'
@@ -101,6 +102,50 @@ export function recordCheckIn(id: string, signature: string): Commitment[] {
       day >= c.streakDays ? 'completed' : 'active'
     return { ...c, checkIns, daysCompleted: day, status }
   })
+  saveCommitments(next)
+  return next
+}
+
+/** Records a confirmed stake-reclaim, keeping the commitment `completed`. */
+export function recordClaim(id: string, signature: string): Commitment[] {
+  const next = loadCommitments().map((c) =>
+    c.id === id ? { ...c, claimSignature: signature } : c,
+  )
+  saveCommitments(next)
+  return next
+}
+
+function daysBetween(fromKey: string, toKey: string): number {
+  const from = new Date(`${fromKey}T00:00:00`)
+  const to = new Date(`${toKey}T00:00:00`)
+  return Math.round((to.getTime() - from.getTime()) / 86_400_000)
+}
+
+/**
+ * A streak is broken if an active, not-yet-complete commitment has gone more
+ * than one calendar day without a check-in (i.e. a full day was skipped). The
+ * last relevant day is the most recent check-in, or the start date if none.
+ */
+export function isStreakBroken(
+  commitment: Commitment,
+  now: Date = new Date(),
+): boolean {
+  if (commitment.status !== 'active') return false
+  if (commitment.daysCompleted >= commitment.streakDays) return false
+
+  const lastKey =
+    commitment.checkIns.length > 0
+      ? commitment.checkIns[commitment.checkIns.length - 1].date
+      : localDateKey(new Date(commitment.startDate))
+
+  return daysBetween(lastKey, localDateKey(now)) > 1
+}
+
+/** Recomputes and persists forfeited statuses for broken streaks. */
+export function refreshStatuses(now: Date = new Date()): Commitment[] {
+  const next = loadCommitments().map((c) =>
+    isStreakBroken(c, now) ? { ...c, status: 'forfeited' as const } : c,
+  )
   saveCommitments(next)
   return next
 }

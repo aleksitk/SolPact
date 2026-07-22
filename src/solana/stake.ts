@@ -62,6 +62,25 @@ export function checkInMemo(day: number, streakDays: number): string {
   return `SolPact check-in: Day ${day}/${streakDays}`
 }
 
+/**
+ * Builds the claim transaction: transfers the staked SOL back from the vault
+ * to the user. The vault is the fee payer and must sign this transaction.
+ */
+export function buildClaimTransaction(params: {
+  vault: PublicKey
+  to: PublicKey
+  amountSol: number
+}): Transaction {
+  const { vault, to, amountSol } = params
+  return new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: vault,
+      toPubkey: to,
+      lamports: solToLamports(amountSol),
+    }),
+  )
+}
+
 export function explorerTxUrl(
   signature: string,
   cluster: string = SOLANA_CLUSTER,

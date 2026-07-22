@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test:stake": "tsx scripts/devnet-stake-test.mts",
-    "test:checkin": "tsx scripts/devnet-checkin-test.mts"
+    "test:checkin": "tsx scripts/devnet-checkin-test.mts",
+    "test:claim": "tsx scripts/devnet-claim-test.mts"
   },
   "dependencies": {
     "@solana/wallet-adapter-phantom": "^0.9.29",
