@@ -1,15 +1,35 @@
 import { useState } from 'react'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { WalletContextProvider } from './solana/WalletContextProvider'
 import { WalletPanel } from './components/WalletPanel'
 import { CreateCommitmentForm } from './components/CreateCommitmentForm'
 import { Dashboard } from './components/Dashboard'
-import { loadCommitments } from './lib/commitments'
+import {
+  loadCommitments,
+  recordCheckIn,
+  type Commitment,
+} from './lib/commitments'
+import { buildCheckInTransaction, checkInMemo } from './solana/stake'
 import { SOLANA_NETWORK } from './config'
 
 function Home() {
-  const { connected } = useWallet()
+  const { connected, publicKey, sendTransaction } = useWallet()
+  const { connection } = useConnection()
   const [commitments, setCommitments] = useState(() => loadCommitments())
+
+  async function handleCheckIn(commitment: Commitment) {
+    if (!publicKey) throw new Error('Connect your wallet first.')
+
+    const day = commitment.daysCompleted + 1
+    const memo = checkInMemo(day, commitment.streakDays)
+    const tx = buildCheckInTransaction({ from: publicKey, memo })
+
+    const signature = await sendTransaction(tx, connection)
+    const latest = await connection.getLatestBlockhash()
+    await connection.confirmTransaction({ signature, ...latest }, 'confirmed')
+
+    setCommitments(recordCheckIn(commitment.id, signature))
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-center">
@@ -33,7 +53,7 @@ function Home() {
             <CreateCommitmentForm
               onCreated={() => setCommitments(loadCommitments())}
             />
-            <Dashboard commitments={commitments} />
+            <Dashboard commitments={commitments} onCheckIn={handleCheckIn} />
           </>
         )}
       </div>

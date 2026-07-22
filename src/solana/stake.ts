@@ -1,10 +1,17 @@
+import { Buffer } from 'buffer'
 import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
 } from '@solana/web3.js'
 import { SOLANA_CLUSTER } from '../config'
+
+// SPL Memo program (v2), used to record daily check-ins on-chain.
+export const MEMO_PROGRAM_ID = new PublicKey(
+  'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr',
+)
 
 export function solToLamports(sol: number): number {
   return Math.round(sol * LAMPORTS_PER_SOL)
@@ -30,6 +37,29 @@ export function buildStakeTransaction(params: {
       lamports: solToLamports(amountSol),
     }),
   )
+}
+
+/**
+ * Builds a daily check-in transaction: a single SPL Memo instruction carrying
+ * the check-in text, signed by the user (their pubkey is included as a signer
+ * so the memo is attributable). Blockhash/fee payer are set by the adapter.
+ */
+export function buildCheckInTransaction(params: {
+  from: PublicKey
+  memo: string
+}): Transaction {
+  const { from, memo } = params
+  return new Transaction().add(
+    new TransactionInstruction({
+      keys: [{ pubkey: from, isSigner: true, isWritable: false }],
+      programId: MEMO_PROGRAM_ID,
+      data: Buffer.from(memo, 'utf8'),
+    }),
+  )
+}
+
+export function checkInMemo(day: number, streakDays: number): string {
+  return `SolPact check-in: Day ${day}/${streakDays}`
 }
 
 export function explorerTxUrl(

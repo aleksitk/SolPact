@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:stake": "tsx scripts/devnet-stake-test.mts"
+    "test:stake": "tsx scripts/devnet-stake-test.mts",
+    "test:checkin": "tsx scripts/devnet-checkin-test.mts"
   },
   "dependencies": {
     "@solana/wallet-adapter-phantom": "^0.9.29",
