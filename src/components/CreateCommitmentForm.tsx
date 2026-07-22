@@ -106,7 +106,7 @@ export function CreateCommitmentForm({
         </label>
 
         <div className="flex gap-4">
-          <label className="flex flex-1 flex-col gap-1 text-sm text-slate-300">
+          <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm text-slate-300">
             Stake (SOL)
             <input
               type="number"
@@ -115,10 +115,10 @@ export function CreateCommitmentForm({
               value={stakeSol}
               onChange={(e) => setStakeSol(e.target.value)}
               disabled={disabled}
-              className="rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100 outline-none focus:border-purple-400"
+              className="w-full min-w-0 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100 outline-none focus:border-purple-400"
             />
           </label>
-          <label className="flex flex-1 flex-col gap-1 text-sm text-slate-300">
+          <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm text-slate-300">
             Streak (days)
             <input
               type="number"
@@ -127,7 +127,7 @@ export function CreateCommitmentForm({
               value={streakDays}
               onChange={(e) => setStreakDays(e.target.value)}
               disabled={disabled}
-              className="rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100 outline-none focus:border-purple-400"
+              className="w-full min-w-0 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100 outline-none focus:border-purple-400"
             />
           </label>
         </div>

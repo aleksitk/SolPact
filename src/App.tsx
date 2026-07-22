@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletContextProvider } from './solana/WalletContextProvider'
 import { WalletPanel } from './components/WalletPanel'
 import { CreateCommitmentForm } from './components/CreateCommitmentForm'
+import { Dashboard } from './components/Dashboard'
+import { loadCommitments } from './lib/commitments'
 import { SOLANA_NETWORK } from './config'
 
 function Home() {
   const { connected } = useWallet()
+  const [commitments, setCommitments] = useState(() => loadCommitments())
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-16 text-center">
@@ -24,7 +28,14 @@ function Home() {
 
       <div className="flex w-full flex-col items-center gap-8">
         <WalletPanel />
-        {connected && <CreateCommitmentForm />}
+        {connected && (
+          <>
+            <CreateCommitmentForm
+              onCreated={() => setCommitments(loadCommitments())}
+            />
+            <Dashboard commitments={commitments} />
+          </>
+        )}
       </div>
     </div>
   )
