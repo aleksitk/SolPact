@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local demo vault keypair (Devnet only, never commit)
+vault-devnet.key.json
+.env
+.env.local
+
+# Local Solana test validator ledger
+.validator-ledger/
